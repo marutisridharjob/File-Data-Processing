@@ -1,0 +1,138 @@
+Here's a Java code snippet to read a file line by line, where each line has a column structure delimited by |. This code validates that each line has the | symbol at the same column positions, ensuring data consistency. Each line is treated as a test scenario.
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class TestScenarioReader {
+    public static void main(String[] args) {
+        String filePath = "path/to/your/file.txt";
+        
+        try {
+            List<List<String>> testScenarios = readAndValidateFile(filePath);
+            System.out.println("All test scenarios read successfully:");
+            for (List<String> scenario : testScenarios) {
+                System.out.println(scenario);
+            }
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static List<List<String>> readAndValidateFile(String filePath) throws IOException {
+        List<List<String>> testScenarios = new ArrayList<>();
+        List<Integer> delimiterPositions = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            int lineNum = 0;
+
+            while ((line = br.readLine()) != null) {
+                lineNum++;
+                String[] columns = line.split("\\|", -1);
+                
+                if (lineNum == 1) {
+                    // Capture the delimiter positions from the first line
+                    int pos = 0;
+                    for (String col : columns) {
+                        pos += col.length() + 1; // +1 for the delimiter
+                        delimiterPositions.add(pos - 1);
+                    }
+                } else {
+                    // Validate delimiter positions match
+                    if (!hasMatchingDelimiters(line, delimiterPositions)) {
+                        throw new IOException("Delimiter mismatch at line " + lineNum);
+                    }
+                }
+
+                // Add columns as a scenario
+                testScenarios.add(List.of(columns));
+            }
+        }
+        return testScenarios;
+    }
+
+    private static boolean hasMatchingDelimiters(String line, List<Integer> positions) {
+        for (int pos : positions) {
+            if (pos < line.length() && line.charAt(pos) != '|') {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+
+Explanation
+
+    Read File Line by Line: The file is read line by line using BufferedReader.
+    Validate Delimiter Positions: For the first line, it captures the delimiter positions (|) for reference.
+    Check for Consistency: For each subsequent line, the code checks if the delimiter appears in the exact same positions. If not, it throws an IOException.
+    Collect Test Scenarios: Each line is split by | and stored as a list of columns, representing a test scenario.
+
+Usage
+
+    Ensure that the file path is set correctly.
+    This program will print each test scenario if the delimiter positions are consistent across all lines.
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Here’s a code snippet that reads each line from a file, stores each line's data as a Set (removing duplicate column values within each line), and then collects each Set in a List to represent the list of all scenarios.
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class ScenarioReader {
+    public static void main(String[] args) {
+        String filePath = "path/to/your/file.txt";
+        
+        try {
+            List<Set<String>> scenarios = readFileIntoScenarios(filePath);
+            System.out.println("All scenarios with unique data in each line:");
+            for (Set<String> scenario : scenarios) {
+                System.out.println(scenario);
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+        }
+    }
+
+    public static List<Set<String>> readFileIntoScenarios(String filePath) throws IOException {
+        List<Set<String>> scenarios = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            
+            while ((line = br.readLine()) != null) {
+                // Split line by '|' delimiter and add columns to a set to remove duplicates
+                String[] columns = line.split("\\|");
+                Set<String> uniqueData = new HashSet<>(List.of(columns));
+                
+                // Add each set of columns as a scenario
+                scenarios.add(uniqueData);
+            }
+        }
+        return scenarios;
+    }
+}
+
+
+Explanation
+
+    Reading File Line by Line: Each line is read from the file using BufferedReader.
+    Splitting and Storing Unique Values: Each line is split by the | delimiter. The resulting columns are added to a HashSet to ensure that only unique values are stored for that line.
+    Collecting Scenarios: Each Set (representing a scenario with unique values) is then added to a List of Set objects, representing the list of all scenarios.
+    Output: The code prints each Set of unique data from each line.
+
+Usage
+
+    Replace "path/to/your/file.txt" with the actual path to your file.
+    The code will output each line’s unique data set as a scenario in the list.
