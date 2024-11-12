@@ -136,3 +136,43 @@ Usage
 
     Replace "path/to/your/file.txt" with the actual path to your file.
     The code will output each line’s unique data set as a scenario in the list.
+
+
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class StringLineProcessor {
+    public static void main(String[] args) {
+        String fileContent = "line1|value1|value2\nline2|value3|value4\nline3|value5|value6"; // Example content
+        
+        // Process the string to get list of sets for each line
+        List<Set<String>> scenarios = processStringToSets(fileContent);
+        
+        // Print each scenario set
+        System.out.println("Scenarios with unique values:");
+        for (Set<String> scenario : scenarios) {
+            System.out.println(scenario);
+        }
+    }
+
+    public static List<Set<String>> processStringToSets(String content) {
+        List<Set<String>> scenarios = new ArrayList<>();
+        
+        // Split the content into lines
+        String[] lines = content.split("\n");
+        
+        for (String line : lines) {
+            // Split each line by '|' and add to a Set to remove duplicates
+            String[] values = line.split("\\|");
+            Set<String> uniqueValues = new HashSet<>(List.of(values));
+            
+            // Add the set of unique values to the list of scenarios
+            scenarios.add(uniqueValues);
+        }
+        
+        return scenarios;
+    }
+}
